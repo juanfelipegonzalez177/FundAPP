@@ -9,14 +9,14 @@ export const getActividades = async () => {
     .order('fechainicio', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return data;
+  return data as any[];
 };
 
 export const createActividad = async (dto: CreateActividadDTO) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('actividades')
-    .insert([dto])
+    .insert(dto as any)
     .select()
     .single();
 
@@ -28,7 +28,7 @@ export const updateActividad = async (id: string, dto: UpdateActividadDTO) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('actividades')
-    .update(dto)
+    .update(dto as any)
     .eq('idactividades', id)
     .select()
     .single();
