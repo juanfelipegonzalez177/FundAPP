@@ -58,9 +58,10 @@ export const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-4">
                 <div className="text-sm text-gray-700 font-medium">Hola, {user.nombrecompleto?.split(' ')[0]}</div>
-                <button onClick={logout} className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
-                  Salir
-                </button>
+                <button onClick={logout} className="flex items-center gap-2 text-sm font-semibold bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-full hover:bg-red-600 hover:text-white transition-all duration-200">
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+  Cerrar sesión
+</button>
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -111,7 +112,10 @@ export const Navbar = () => {
               </div>
             ) : (
               <div className="mt-6 flex flex-col gap-2 px-3">
-                <button onClick={logout} className="w-full text-center py-2 text-sm font-semibold border border-red-200 text-red-600 rounded-md hover:bg-red-50">Cerrar Sesión</button>
+                <button onClick={logout} className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold bg-red-50 border border-red-200 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-200">
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+  Cerrar sesión
+</button>
               </div>
             )}
           </div>
