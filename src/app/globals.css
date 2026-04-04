@@ -1,26 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-verde-primario: #2D6A4F;
+  --color-verde-claro: #40916C;
+  --color-verde-oscuro: #1B4332;
+  --color-verde-fondo: #F0FFF4;
+  --color-gris-fondo: #F5F5F0;
+  --color-blanco-cards: #FFFFFF;
+  --color-texto-principal: #1A1A1A;
+  --color-texto-secundario: #6B7280;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-display: 'Fraunces', serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --verde-primario: #2D6A4F;
+    --verde-claro: #40916C;
+    --verde-oscuro: #1B4332;
+    --verde-fondo: #F0FFF4;
+    --gris-fondo: #F5F5F0;
+    --blanco-cards: #FFFFFF;
+    --texto-principal: #1A1A1A;
+    --texto-secundario: #6B7280;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background-color: var(--gris-fondo);
+    color: var(--texto-principal);
+    font-family: var(--font-sans);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--verde-claro);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--verde-primario);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .badge-success {
+    @apply bg-[#D1FAE5] text-[#065F46];
+  }
+  .badge-warning {
+    @apply bg-[#FEF3C7] text-[#92400E];
+  }
+  .badge-error {
+    @apply bg-[#FEE2E2] text-[#991B1B];
+  }
+  .badge-info {
+    @apply bg-[#DBEAFE] text-[#1E40AF];
+  }
+  .fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
