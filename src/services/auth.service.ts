@@ -3,8 +3,6 @@ import jwt from 'jsonwebtoken';
 import { createClient } from '@/lib/supabase/server';
 import { LoginDTO, RegisterDTO } from '@/types/auth.types';
 
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET!;
-
 function hashSHA256(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
@@ -18,12 +16,14 @@ export const verifyPasswordHash = (password: string, hash: string) => {
 };
 
 export const createToken = (payload: any) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+  const secret = process.env.SUPABASE_JWT_SECRET!;
+  return jwt.sign(payload, secret, { expiresIn: '24h' });
 };
 
 export const verifyToken = (token: string) => {
   try {
-    return jwt.verify(token, JWT_SECRET) as any;
+    const secret = process.env.SUPABASE_JWT_SECRET!;
+    return jwt.verify(token, secret) as any;
   } catch (error) {
     return null;
   }
