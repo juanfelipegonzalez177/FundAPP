@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         actividades(*),
         voluntarios(*)
       `)
-      .order('fechapostulacion', { ascending: false });
+      .order('idpostulaciones', { ascending: false });
 
     if (error) throw error;
     

@@ -17,7 +17,8 @@ export async function GET(req: Request) {
     const { data: volData, error } = await supabase
       .schema('voluntariado')
       .from('voluntarios')
-      .select('*');
+      .select('*')
+      .order('idvoluntarios', { ascending: false });
 
     if (error) throw error;
     
