@@ -1,78 +1,108 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/services/auth.service';
-import { getCertificados, solicitarCertificado, aprobarCertificado, rechazarCertificado } from '@/services/certificado.service';
-import { generarCertificadoPDF } from '@/utils/pdf';
 import { createClient } from '@/lib/supabase/server';
-
-const getUserInfo = (req: Request) => {
-  const authHeader = req.headers.get('Authorization');
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    return verifyToken(authHeader.split(' ')[1]);
-  }
-  return null;
-};
-
-export async function GET(req: Request) {
-  try {
-    const user = getUserInfo(req);
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-
-    const personaId = user.rol === 'admin' ? undefined : user.id;
-    const data = await getCertificados(personaId);
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-}
 
 export async function POST(req: Request) {
   try {
-    const user = getUserInfo(req);
-    // Para simplificar, asumiremos que si hay info de usuario sacamos el ID.
-    // Si no, personaId default null
-    
     const body = await req.json();
-    const personaId = user?.id || null;
-    const data = await solicitarCertificado(personaId, body);
-    return NextResponse.json(data, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-}
-
-export async function PATCH(req: Request) {
-  try {
-    const user = getUserInfo(req);
-    if (!user || user.rol !== 'admin') return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const { tipo_documento, numero_documento, tipo } = body;
     
-    const body = await req.json();
-    if (!body.id || !body.estado) throw new Error('Faltan datos');
-
-    if (body.estado === 'aprobado') {
-      // Necesitamos info para pdf
-      const supabase = await createClient();
-      const { data: cert } = await supabase.from('certificados').select('*, personas(nombre)').eq('id', body.id).single();
-      
-      const buffer = generarCertificadoPDF({
-        nombre: cert?.personas?.nombre || 'Usuario Desconocido',
-        tipo: cert?.tipo_certificado === 'Donación' || cert?.tipo_certificado === 'donacion' ? 'donacion' : 'participacion',
-        documento: cert?.numero_documento || 'SN'
-      });
-
-      // Dummy upload. En un proyecto real se subiría al storage de supabase.
-      // const url = uploadToSupabaseStorage(...)
-      const dummyUrl = `data:application/pdf;base64,${buffer.toString('base64')}`;
-      
-      const data = await aprobarCertificado(body.id, dummyUrl);
-      return NextResponse.json(data);
-    } else if (body.estado === 'rechazado') {
-      const data = await rechazarCertificado(body.id);
-      return NextResponse.json(data);
+    if (!numero_documento || !tipo_documento || !tipo) {
+      return NextResponse.json({ message: 'Faltan datos requeridos.' }, { status: 400 });
     }
-    
-    return NextResponse.json({ error: 'Estado no válido' }, { status: 400 });
+
+    const supabase = await createClient();
+
+    // Paso 1: buscar usuario por numerodocumento + tipodocumento
+    const { data: usuario, error: userError } = await supabase
+      .schema('usuarios')
+      .from('usuarios')
+      .select('idusuarios, nombrecompleto')
+      .eq('numerodocumento', parseInt(numero_documento, 10))
+      .eq('tipodocumento', tipo_documento)
+      .single();
+
+    if (userError || !usuario) {
+      return NextResponse.json({ message: 'No se encontró un certificado para este documento' }, { status: 404 });
+    }
+
+    // Paso 2a: si tipo === 'participacion'
+    if (tipo === 'participacion') {
+      const { data: voluntarios, error: volError } = await supabase
+        .schema('voluntariado')
+        .from('voluntarios')
+        .select('idvoluntarios')
+        .eq('usuarios_idusuarios', usuario.idusuarios)
+        .single();
+        
+      if (volError || !voluntarios) {
+        return NextResponse.json({ message: 'No se encontró un certificado para este documento' }, { status: 404 });
+      }
+
+      const { data: certificados, error: certError } = await supabase
+        .schema('voluntariado')
+        .from('certificados')
+        .select(`
+          *,
+          actividades:actividades_idactividades (
+             nombreactividad, descripcion, fechainicio, fechafin
+          )
+        `)
+        .eq('voluntarios_idvoluntarios', voluntarios.idvoluntarios)
+        .order('idcertificados', { ascending: false })
+        .limit(1);
+
+      if (certError || !certificados || certificados.length === 0) {
+        return NextResponse.json({ message: 'No se encontró un certificado para este documento' }, { status: 404 });
+      }
+
+      const cert = certificados[0];
+      const act = Array.isArray(cert.actividades) ? cert.actividades[0] : cert.actividades;
+
+      return NextResponse.json({
+        data: {
+          tipo: 'voluntariado',
+          nombreVoluntario: usuario.nombrecompleto,
+          actividad: act?.nombreactividad || cert.actividadasociada || 'Actividad Solidaria',
+          fechaInicio: act?.fechainicio || new Date().toISOString(),
+          fechaFin: act?.fechafin || new Date().toISOString()
+        }
+      });
+    } 
+    // Paso 2b: si tipo === 'donacion'
+    else if (tipo === 'donacion') {
+      const { data: donaciones, error: donError } = await supabase
+        .schema('donaciones')
+        .from('donaciones')
+        .select(`
+          *,
+          comprobantes:comprobantes(codigocomprobante)
+        `)
+        .eq('usuarios_idusuarios', usuario.idusuarios)
+        .eq('estadopago', 'Confirmada')
+        .order('fechadonacion', { ascending: false })
+        .limit(1);
+
+      if (donError || !donaciones || donaciones.length === 0) {
+        return NextResponse.json({ message: 'No se encontró un certificado para este documento' }, { status: 404 });
+      }
+
+      const donacion = donaciones[0];
+      const comp = donacion.comprobantes ? (Array.isArray(donacion.comprobantes) ? donacion.comprobantes[0] : donacion.comprobantes) : null;
+
+      return NextResponse.json({
+        data: {
+          tipo: 'donacion',
+          nombreDonante: usuario.nombrecompleto,
+          monto: donacion.monto,
+          metodoPago: donacion.metodopago || 'Online',
+          fechaDonacion: donacion.fechadonacion,
+          codigoComprobante: comp?.codigocomprobante || donacion.iddonaciones || 'N/A'
+        }
+      });
+    } else {
+      return NextResponse.json({ message: 'Tipo de certificado inválido' }, { status: 400 });
+    }
   } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ message: 'No se encontró un certificado para este documento' }, { status: 500 });
   }
 }

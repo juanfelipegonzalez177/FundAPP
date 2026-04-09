@@ -23,13 +23,13 @@ export default function PerfilPage() {
 
   const { postulaciones, fetchPostulaciones } = useVoluntarios();
   const { donaciones, fetchDonaciones } = useDonaciones();
-  const { certificados, fetchCertificados } = useCertificados();
+  const { fetchCertificados, certificados, loading, error } = useCertificados();
 
   useEffect(() => {
     fetchPostulaciones();
     fetchDonaciones();
     fetchCertificados();
-  }, [fetchPostulaciones, fetchDonaciones, fetchCertificados]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -62,12 +62,12 @@ export default function PerfilPage() {
     }
   };
 
-  const aprobados = certificados.filter(c => c.estado === 'aprobado');
+  const aprobados = (Array.isArray(certificados) ? certificados : []).filter(c => c.estado === 'aprobado');
 
   const eventosRecientes = [
-    ...postulaciones.map(p => ({ type: 'vol', date: p.fechapostulacion || new Date(), msg: `Postulación a actividad: ${(p as any).actividades?.nombreactividad || 'N/A'} — Estado: ${p.estadopostulacion}`, color: '#2D6A4F' })),
-    ...donaciones.map(d => ({ type: 'don', date: d.fechadonacion, msg: `Donación por ${formatearMonto(d.monto)} vía ${d.metodopago}`, color: '#3B82F6' })),
-    ...certificados.map(c => ({ type: 'cert', date: c.created_at || new Date().toISOString(), msg: `Solicitud cert ${c.tipo_certificado || c.actividadasociada} — Estado: ${c.estado}`, color: '#F59E0B' }))
+    ...(Array.isArray(postulaciones) ? postulaciones : []).map(p => ({ type: 'vol', date: p.fechapostulacion || new Date(), msg: `Postulación a actividad: ${(p as any).actividades?.nombreactividad || 'N/A'} — Estado: ${p.estadopostulacion}`, color: '#2D6A4F' })),
+    ...(Array.isArray(donaciones) ? donaciones : []).map(d => ({ type: 'don', date: d.fechadonacion, msg: `Donación por ${formatearMonto(d.monto)} vía ${d.metodopago}`, color: '#3B82F6' })),
+    ...(Array.isArray(certificados) ? certificados : []).map(c => ({ type: 'cert', date: c.created_at || new Date().toISOString(), msg: `Solicitud cert ${c.tipo_certificado || c.actividadasociada} — Estado: ${c.estado}`, color: '#F59E0B' }))
   ].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (

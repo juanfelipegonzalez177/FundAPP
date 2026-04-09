@@ -9,6 +9,7 @@ export const Sidebar = () => {
         <Link href="/admin" className="px-4 py-2 hover:bg-gray-100 rounded-lg text-sm font-medium text-gray-700">Dashboard</Link>
         <Link href="/admin/actividades" className="px-4 py-2 hover:bg-gray-100 rounded-lg text-sm font-medium text-gray-700">Actividades</Link>
         <Link href="/admin/voluntarios" className="px-4 py-2 hover:bg-gray-100 rounded-lg text-sm font-medium text-gray-700">Voluntarios</Link>
+        <Link href="/admin/postulaciones" className="px-4 py-2 hover:bg-gray-100 rounded-lg text-sm font-medium text-gray-700">Postulaciones</Link>
       </div>
     </div>
   );

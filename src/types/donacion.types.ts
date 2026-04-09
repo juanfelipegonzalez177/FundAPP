@@ -8,6 +8,8 @@ export interface Donacion {
 }
 
 export interface CreateDonacionDTO {
+  nombrecompleto?: string;
+  correo?: string;
   monto: number;
   metodopago: string;
   propositodonacion?: string;

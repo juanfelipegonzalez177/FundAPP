@@ -11,8 +11,8 @@ export const DonationForm = () => {
   const { notify } = useNotif();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<CreateDonacionDTO>({
     defaultValues: {
-      nombres_apellidos: user?.nombre || '',
-      email: user?.email || '',
+      nombrecompleto: user?.nombrecompleto || '',
+      correo: user?.correo || '',
     }
   });
   const [submitting, setSubmitting] = useState(false);
@@ -40,10 +40,10 @@ export const DonationForm = () => {
       <Input
         label="Nombres y Apellidos"
         type="text"
-        error={errors.nombres_apellidos?.message}
-        readOnly={!!user?.nombre}
-        className={user?.nombre ? "opacity-75" : ""}
-        {...register('nombres_apellidos', { required: 'Requerido' })}
+        error={errors.nombrecompleto?.message as any}
+        readOnly={!!user?.nombrecompleto}
+        className={user?.nombrecompleto ? "opacity-75" : ""}
+        {...register('nombrecompleto' as any, { required: 'Requerido' })}
       />
 
       <div className="relative">
@@ -61,26 +61,26 @@ export const DonationForm = () => {
       <Input
         label="Correo Electrónico"
         type="email"
-        error={errors.email?.message}
-        readOnly={!!user?.email}
-        className={user?.email ? "opacity-75" : ""}
-        {...register('email', { required: 'Requerido' })}
+        error={errors.correo?.message as any}
+        readOnly={!!user?.correo}
+        className={user?.correo ? "opacity-75" : ""}
+        {...register('correo' as any, { required: 'Requerido' })}
       />
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-gray-700">Método de Pago</label>
         <select 
           className="flex w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
-          {...register('metodo_pago', { required: 'Requerido' })}
+          {...register('metodopago' as any, { required: 'Requerido' })}
         >
           <option value="">Selecciona un método</option>
-          <option value="Tarjeta de crédito">Tarjeta de crédito</option>
+          <option value="Tarjeta Crédito">Tarjeta Crédito</option>
           <option value="Transferencia">Transferencia</option>
           <option value="PSE">PSE</option>
           <option value="Nequi">Nequi</option>
           <option value="Daviplata">Daviplata</option>
         </select>
-        {errors.metodo_pago && <span className="text-xs text-red-500">{errors.metodo_pago.message}</span>}
+        {errors.metodopago && <span className="text-xs text-red-500">{errors.metodopago.message as any}</span>}
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -88,7 +88,7 @@ export const DonationForm = () => {
         <textarea
           className="flex w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] min-h-[100px]"
           placeholder="Escribe un mensaje de apoyo..."
-          {...register('descripcion')}
+          {...register('propositodonacion' as any)}
         />
       </div>
 

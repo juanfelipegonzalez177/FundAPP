@@ -17,28 +17,40 @@ export const getDonaciones = async (idusuarios?: string) => {
   return data;
 };
 
-export const createDonacion = async (idusuarios: string | null, dto: CreateDonacionDTO) => {
+export const createDonacion = async (
+  idusuarios: string | null, 
+  dto: CreateDonacionDTO
+) => {
   const supabase = await createClient();
 
+  // PASO 1: Crear el donante primero
+  const { data: donante, error: errorDonante } = await supabase
+    .schema('donaciones')
+    .from('donante')
+    .insert([{
+      propositodonacion: dto.propositodonacion || 'Donación voluntaria general',
+      usuarios_idusuarios: idusuarios ? parseInt(idusuarios, 10) : null
+    }])
+    .select()
+    .single();
+
+  if (errorDonante) throw new Error(errorDonante.message);
+
+  // PASO 2: Crear la donación con el id del donante
   const { data, error } = await supabase
+    .schema('donaciones')
     .from('donaciones')
     .insert([{
       monto: dto.monto,
-      metodopago: dto.metodopago,
-      estadopago: 'completado',
-      usuarios_idusuarios: idusuarios
+      metodopago: dto.metodopago as any,
+      estadopago: 'Confirmada',         // ✅ valor automático y confirmado
+      anonima: 'No',                   // ✅ requerido: 'Si' o 'No'
+      usuarios_idusuarios: idusuarios ? parseInt(idusuarios, 10) : null,
+      donante_idinvitados: donante.idinvitados  // ✅ FK requerida
     }])
     .select()
     .single();
 
   if (error) throw new Error(error.message);
-
-  if (dto.propositodonacion && data) {
-    await supabase.from('donante').insert([{ // Requires view 'donante'
-      propositodonacion: dto.propositodonacion,
-      usuarios_idusuarios: idusuarios
-    }]);
-  }
-
   return data;
 };

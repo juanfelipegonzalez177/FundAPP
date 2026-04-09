@@ -1,0 +1,11 @@
+C:\fundapp\src\app\(auth)\login\page.tsx
+C:\fundapp\src\app\(auth)\recovery\page.tsx
+C:\fundapp\src\app\(auth)\register\page.tsx
+C:\fundapp\src\app\(dashboard)\actividades\page.tsx
+C:\fundapp\src\app\(dashboard)\certificados\page.tsx
+C:\fundapp\src\app\(dashboard)\donaciones\page.tsx
+C:\fundapp\src\app\(dashboard)\page.tsx
+C:\fundapp\src\app\(dashboard)\perfil\page.tsx
+C:\fundapp\src\app\admin\actividades\page.tsx
+C:\fundapp\src\app\admin\page.tsx
+C:\fundapp\src\app\admin\voluntarios\page.tsx

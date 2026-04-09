@@ -13,6 +13,7 @@ export interface CreateActividadDTO {
   descripcion: string;
   fechainicio: string;
   fechafin?: string;
+  cuposdisponibles?: number;
 }
 
 export interface UpdateActividadDTO extends Partial<CreateActividadDTO> {}

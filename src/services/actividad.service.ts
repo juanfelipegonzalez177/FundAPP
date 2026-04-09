@@ -4,6 +4,7 @@ import { CreateActividadDTO, UpdateActividadDTO } from '@/types/actividad.types'
 export const getActividades = async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
+    .schema('voluntariado')
     .from('actividades')
     .select('*')
     .order('fechainicio', { ascending: false });
@@ -15,6 +16,7 @@ export const getActividades = async () => {
 export const createActividad = async (dto: CreateActividadDTO) => {
   const supabase = await createClient();
   const { data, error } = await supabase
+    .schema('voluntariado')
     .from('actividades')
     .insert(dto as any)
     .select()
@@ -27,6 +29,7 @@ export const createActividad = async (dto: CreateActividadDTO) => {
 export const updateActividad = async (id: string, dto: UpdateActividadDTO) => {
   const supabase = await createClient();
   const { data, error } = await supabase
+    .schema('voluntariado')
     .from('actividades')
     .update(dto as any)
     .eq('idactividades', id)
@@ -40,6 +43,7 @@ export const updateActividad = async (id: string, dto: UpdateActividadDTO) => {
 export const deleteActividad = async (id: string) => {
   const supabase = await createClient();
   const { error } = await supabase
+    .schema('voluntariado')
     .from('actividades')
     .delete()
     .eq('idactividades', id);

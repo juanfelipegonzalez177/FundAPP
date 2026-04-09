@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { createClient } from '@/lib/supabase/server';
 import { LoginDTO, RegisterDTO } from '@/types/auth.types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_SECRET = process.env.SUPABASE_JWT_SECRET!;
 
 function hashSHA256(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
@@ -32,7 +32,8 @@ export const verifyToken = (token: string) => {
 export const login = async (dto: LoginDTO) => {
   const supabase = await createClient();
   const { data: usuario, error } = await supabase
-    .from('personas')
+    .schema('usuarios')
+    .from('usuarios')
     .select('*')
     .eq('correo', dto.email)
     .single();
@@ -44,7 +45,8 @@ export const login = async (dto: LoginDTO) => {
 
   // Obtener rol
   const { data: userRole } = await supabase
-    .from('roles_has_usuarios') // View needs to be created in public schema
+    .schema('usuarios')
+    .from('roles_has_usuarios')
     .select('roles_idroles')
     .eq('usuarios_idusuarios', usuario.idusuarios)
     .single();
@@ -52,7 +54,8 @@ export const login = async (dto: LoginDTO) => {
   let rolLiteral = 'voluntario';
   if (userRole) {
      const { data: rolData } = await supabase
-       .from('roles') // View needs to be created in public schema
+       .schema('usuarios')
+       .from('roles')
        .select('nombrerol')
        .eq('idroles', userRole.roles_idroles)
        .single();
@@ -62,9 +65,9 @@ export const login = async (dto: LoginDTO) => {
   }
 
   const { contrasena, ...userWithoutPass } = usuario;
-  const user = { ...userWithoutPass, rol: rolLiteral };
+  const user = { ...userWithoutPass, rol: rolLiteral, esAdmin: rolLiteral === 'admin' };
   
-  const token = createToken({ id: user.idusuarios, rol: user.rol });
+  const token = createToken({ id: user.idusuarios, rol: user.rol, esAdmin: user.esAdmin });
   return { user, token };
 };
 
@@ -72,7 +75,8 @@ export const register = async (dto: RegisterDTO) => {
   const supabase = await createClient();
   
   const { data: existing } = await supabase
-    .from('personas')
+    .schema('usuarios')
+    .from('usuarios')
     .select('idusuarios')
     .eq('correo', dto.email)
     .single();
@@ -82,13 +86,15 @@ export const register = async (dto: RegisterDTO) => {
   const passwordHash = hashPassword(dto.password);
 
   const { data: newUser, error } = await supabase
-    .from('personas')
+    .schema('usuarios')
+    .from('usuarios')
     .insert([{
       nombrecompleto: dto.nombrecompleto,
-      numerodocumento: dto.numerodocumento || Date.now().toString(),
+      numerodocumento: parseInt(dto.numerodocumento, 10) || Date.now(),
       tipodocumento: 'CC',
       correo: dto.email,
-      contrasena: passwordHash
+      contrasena: passwordHash,
+      estadodecuenta: 'Activo'
     }])
     .select()
     .single();
@@ -96,8 +102,8 @@ export const register = async (dto: RegisterDTO) => {
   if (error) throw new Error(error.message);
 
   const { contrasena, ...userWithoutPass } = newUser;
-  const user = { ...userWithoutPass, rol: 'voluntario' };
-  const token = createToken({ id: user.idusuarios, rol: user.rol });
+  const user = { ...userWithoutPass, rol: 'voluntario', esAdmin: false };
+  const token = createToken({ id: user.idusuarios, rol: user.rol, esAdmin: user.esAdmin });
 
   return { user, token };
 };

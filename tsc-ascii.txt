@@ -1,0 +1,1 @@
+﻿src/context/AuthProvider.tsx(92,27): error TS2741: Property 'isAdmin' is missing in type '{ user: (Omit<Usuario, "contrasena"> & { rol: string; }) | null; token: string | null; isLoading: boolean; login: (data: LoginDTO) => Promise<void>; logout: () => void; register: (data: any) => Promise<...>; }' but required in type 'AuthContextProps'.

@@ -4,18 +4,20 @@ import { CreatePostulacionDTO } from '@/types/voluntario.types';
 export const getPostulaciones = async (idusuarios?: string) => {
   const supabase = await createClient();
   let query = supabase
+    .schema('voluntariado')
     .from('postulaciones')
     .select(`*, voluntarios!inner(*), actividades(*)`); // Use standard PostgREST join on inner
 
   if (idusuarios) {
     const { data: vol } = await supabase
+      .schema('voluntariado')
       .from('voluntarios')
       .select('idvoluntarios')
       .eq('usuarios_idusuarios', idusuarios)
       .single();
-      
+
     if (vol) query = query.eq('voluntarios_idvoluntarios', vol.idvoluntarios);
-    else return []; 
+    else return [];
   }
 
   const { data, error } = await query;
@@ -28,6 +30,7 @@ export const createPostulacion = async (idusuarios: string, dto: CreatePostulaci
 
   let idvoluntarios = '';
   const { data: volExists } = await supabase
+    .schema('voluntariado')
     .from('voluntarios')
     .select('idvoluntarios')
     .eq('usuarios_idusuarios', idusuarios)
@@ -37,6 +40,7 @@ export const createPostulacion = async (idusuarios: string, dto: CreatePostulaci
     idvoluntarios = volExists.idvoluntarios;
   } else {
     const { data: newVol, error: errVol } = await supabase
+      .schema('voluntariado')
       .from('voluntarios')
       .insert([{ usuarios_idusuarios: idusuarios, usuarios_idusuarios_ref: idusuarios }])
       .select('idvoluntarios')
@@ -46,6 +50,7 @@ export const createPostulacion = async (idusuarios: string, dto: CreatePostulaci
   }
 
   const { data: existing } = await supabase
+    .schema('voluntariado')
     .from('postulaciones')
     .select('idpostulaciones')
     .eq('voluntarios_idvoluntarios', idvoluntarios)
@@ -55,9 +60,12 @@ export const createPostulacion = async (idusuarios: string, dto: CreatePostulaci
   if (existing) throw new Error('Ya estás postulado a esta actividad');
 
   const { data, error } = await supabase
+    .schema('voluntariado')
     .from('postulaciones')
     .insert([{
       voluntarios_idvoluntarios: idvoluntarios,
+      voluntarios_usuarios_idusuarios: idusuarios,
+      usuarios_idusuarios: idusuarios,
       actividades_idactividades: dto.actividades_idactividades,
       estadopostulacion: 'pendiente'
     }])
@@ -71,6 +79,7 @@ export const createPostulacion = async (idusuarios: string, dto: CreatePostulaci
 export const updateEstado = async (idpostulaciones: string, estadopostulacion: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
+    .schema('voluntariado')
     .from('postulaciones')
     .update({ estadopostulacion })
     .eq('idpostulaciones', idpostulaciones)

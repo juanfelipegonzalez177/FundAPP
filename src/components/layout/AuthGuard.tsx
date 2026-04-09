@@ -4,24 +4,23 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { Spinner } from '../shared/Spinner';
 
-export const AuthGuard = ({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) => {
+export const AuthGuard = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
         router.push('/login');
-      } else if (requireAdmin && user.rol !== 'admin') {
+      } else if (adminOnly && user.rol !== 'admin') {
         router.push('/actividades');
       }
     }
-  }, [user, isLoading, requireAdmin, router]);
+  }, [user, isLoading, adminOnly, router]);
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Spinner /></div>;
   
-  if (!user || (requireAdmin && user.rol !== 'admin')) return null;
+  if (!user || (adminOnly && user.rol !== 'admin')) return null;
 
   return <>{children}</>;
 };

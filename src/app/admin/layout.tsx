@@ -4,7 +4,7 @@ import { AuthGuard } from '@/components/layout/AuthGuard';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard requireAdmin>
+    <AuthGuard adminOnly>
       <div className="flex flex-col min-h-screen bg-[#F5F5F0]">
         <Navbar />
         <div className="flex flex-1 overflow-hidden">

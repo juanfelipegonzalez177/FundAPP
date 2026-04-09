@@ -88,8 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push('/login');
   };
 
+  const isAdmin = () => user?.rol === 'admin';
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, register, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

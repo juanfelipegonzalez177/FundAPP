@@ -33,18 +33,21 @@ export const Navbar = () => {
             <div className="flex items-center space-x-8">
               <Link href="/" className={getLinkClass('/')}>Inicio</Link>
 
-              {/* Conditionally reveal if user is logged in */}
-              {user && (
+              {/* Non-admin logged-in users */}
+              {user && user.rol !== 'admin' && (
                 <>
                   <Link href="/actividades" className={getLinkClass('/actividades')}>Postúlate</Link>
                   <Link href="/certificados" className={getLinkClass('/certificados')}>Certificados</Link>
+                  <Link href="/donaciones" className={getLinkClass('/donaciones')}>Hacer Donación</Link>
                 </>
               )}
 
-              {/* Donaciones always visible */}
-              <Link href="/donaciones" className={getLinkClass('/donaciones')}>Hacer Donación</Link>
+              {/* Donaciones visible for guests (not logged in) */}
+              {!user && (
+                <Link href="/donaciones" className={getLinkClass('/donaciones')}>Hacer Donación</Link>
+              )}
 
-              {user && (
+              {user && user.rol !== 'admin' && (
                 <Link href="/perfil" className={getLinkClass('/perfil')}>Mi Perfil</Link>
               )}
 
@@ -57,7 +60,16 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-700 font-medium">Hola, {user.nombrecompleto?.split(' ')[0]}</div>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium">Hola, {user.nombrecompleto?.split(' ')[0]}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                    user.rol === 'admin'
+                      ? 'bg-[#2D6A4F] text-white'
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {user.rol === 'admin' ? 'Administrador' : 'Usuario'}
+                  </span>
+                </div>
                 <button onClick={logout} className="flex items-center gap-2 text-sm font-semibold bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-full hover:bg-red-600 hover:text-white transition-all duration-200">
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
   Cerrar sesión
@@ -92,17 +104,17 @@ export const Navbar = () => {
           <div className="px-4 pt-2 pb-6 space-y-2">
             <Link href="/" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Inicio</Link>
 
-            {user && (
+            {user && user.rol !== 'admin' && (
               <>
                 <Link href="/actividades" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Postúlate</Link>
                 <Link href="/certificados" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Certificados</Link>
+                <Link href="/donaciones" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Donaciones</Link>
+                <Link href="/perfil" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Mi Perfil</Link>
               </>
             )}
 
-            <Link href="/donaciones" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Donaciones</Link>
-
-            {user && (
-              <Link href="/perfil" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Mi Perfil</Link>
+            {!user && (
+              <Link href="/donaciones" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#2D6A4F] hover:bg-gray-50 rounded-md">Donaciones</Link>
             )}
 
             {!user ? (
