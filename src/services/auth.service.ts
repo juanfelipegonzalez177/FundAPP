@@ -31,19 +31,30 @@ export const verifyToken = (token: string) => {
 
 export const login = async (dto: LoginDTO) => {
   const supabase = await createClient();
-  const { data: usuario, error } = await supabase
+
+  // 1. Iniciar sesión en Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email: dto.email,
+    password: dto.password,
+  });
+
+  if (authError) {
+    throw new Error(authError.message === 'Invalid login credentials' ? 'Credenciales inválidas' : authError.message);
+  }
+
+  // 2. Obtener el perfil del usuario de la base de datos
+  const { data: usuario, error: dbError } = await supabase
     .schema('usuarios')
     .from('usuarios')
     .select('*')
     .eq('correo', dto.email)
     .single();
 
-  if (error || !usuario) throw new Error('Credenciales inválidas');
+  if (dbError || !usuario) {
+    throw new Error('Usuario no registrado en la base de datos de la plataforma');
+  }
 
-  const isValid = verifyPasswordHash(dto.password, usuario.contrasena);
-  if (!isValid) throw new Error('Credenciales inválidas');
-
-  // Obtener rol
+  // 3. Obtener rol del usuario
   const { data: userRole } = await supabase
     .schema('usuarios')
     .from('roles_has_usuarios')
@@ -74,6 +85,7 @@ export const login = async (dto: LoginDTO) => {
 export const register = async (dto: RegisterDTO) => {
   const supabase = await createClient();
   
+  // 1. Verificar si ya existe en la base de datos
   const { data: existing } = await supabase
     .schema('usuarios')
     .from('usuarios')
@@ -83,9 +95,26 @@ export const register = async (dto: RegisterDTO) => {
 
   if (existing) throw new Error('El correo ya está registrado');
 
+  // 2. Registrar en Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email: dto.email,
+    password: dto.password,
+    options: {
+      data: {
+        nombrecompleto: dto.nombrecompleto,
+        numerodocumento: dto.numerodocumento,
+      }
+    }
+  });
+
+  if (authError) {
+    throw new Error(authError.message);
+  }
+
+  // 3. Insertar perfil en la tabla de usuarios
   const passwordHash = hashPassword(dto.password);
 
-  const { data: newUser, error } = await supabase
+  const { data: newUser, error: dbError } = await supabase
     .schema('usuarios')
     .from('usuarios')
     .insert([{
@@ -99,7 +128,9 @@ export const register = async (dto: RegisterDTO) => {
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (dbError || !newUser) {
+    throw new Error(dbError?.message || 'Error al insertar usuario en la base de datos');
+  }
 
   const { contrasena, ...userWithoutPass } = newUser;
   const user = { ...userWithoutPass, rol: 'voluntario', esAdmin: false };

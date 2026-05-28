@@ -55,7 +55,7 @@ export const LoginForm = () => {
       </div>
 
       <div className="flex justify-center mt-2">
-        <Link href="/recovery" className="text-sm font-medium text-[#2D6A4F] hover:underline">
+        <Link href="/recovery" className="text-sm font-medium text-primary hover:underline">
           ¿Olvidó su contraseña?
         </Link>
       </div>
@@ -66,7 +66,7 @@ export const LoginForm = () => {
 
       <div className="text-center mt-4">
         <span className="text-sm text-gray-600">¿No tienes cuenta? </span>
-        <Link href="/register" className="text-sm font-medium text-[#2D6A4F] hover:underline">
+        <Link href="/register" className="text-sm font-medium text-primary hover:underline">
           Regístrate aquí
         </Link>
       </div>

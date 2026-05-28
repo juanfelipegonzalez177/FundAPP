@@ -15,8 +15,8 @@ export default function RecoveryPage() {
   return (
     <div className="w-full max-w-[460px]">
       <Card className="p-8">
-        <h1 className="text-2xl font-bold text-center text-[#1A1A1A] mb-4">RECUPERAR CONTRASEÑA</h1>
-        <p className="text-center text-sm text-gray-600 mb-6 font-medium">
+        <h1 className="text-2xl font-bold text-center text-text mb-4">RECUPERAR CONTRASEÑA</h1>
+        <p className="text-center text-sm text-text-muted mb-6 font-medium">
           Ingresa tu correo electrónico y te enviaremos un código de recuperación
         </p>
         <form onSubmit={handleRecover} className="flex flex-col gap-4 w-full">
@@ -31,7 +31,7 @@ export default function RecoveryPage() {
             ENVIAR CÓDIGO
           </Button>
           <div className="text-center mt-2">
-            <Link href="/login" className="text-sm font-medium text-[#2D6A4F] hover:underline">
+            <Link href="/login" className="text-sm font-medium text-primary hover:underline">
               Volver al inicio de sesión
             </Link>
           </div>

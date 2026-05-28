@@ -1,5 +1,6 @@
 import { AuthProvider } from '@/context/AuthProvider';
 import { NotifProvider } from '@/context/NotifContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import './globals.css';
 
 export const metadata = {
@@ -14,13 +15,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="antialiased min-h-screen">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark')
+                } else {
+                  document.documentElement.classList.remove('dark')
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
+      <body className="antialiased min-h-screen bg-background text-text transition-colors duration-300">
         <NotifProvider>
           <AuthProvider>
-            {children}
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
           </AuthProvider>
         </NotifProvider>
       </body>
     </html>
   );
 }
+

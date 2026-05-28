@@ -19,17 +19,17 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props 
 }) => {
-  const baseStyled = "inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium transition-all focus:outline-none";
+  const baseStyled = "inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold transition-all duration-300 focus:outline-none cursor-pointer select-none active:scale-95";
   const variants = {
-    primary: "bg-[#2D6A4F] text-white hover:bg-[#40916C]",
-    outline: "border-2 border-[#2D6A4F] text-[#2D6A4F] bg-transparent hover:bg-[#F0FFF4]",
-    ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
-    danger: "bg-red-600 text-white hover:bg-red-700",
+    primary: "bg-primary text-white hover:bg-secondary hover:shadow-[0_4px_14px_0_rgba(45,106,79,0.3)] dark:hover:shadow-[0_4px_14px_0_rgba(82,183,136,0.3)] border border-transparent",
+    outline: "border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-white hover:shadow-[0_4px_14px_0_rgba(45,106,79,0.15)]",
+    ghost: "bg-transparent text-text hover:bg-primary/10",
+    danger: "bg-red-600 text-white hover:bg-red-700 hover:shadow-[0_4px_14px_0_rgba(220,38,38,0.3)] border border-transparent",
   };
 
   return (
     <button
-      className={cn(baseStyled, variants[variant], (disabled || isLoading) && "opacity-60 cursor-not-allowed", className)}
+      className={cn(baseStyled, variants[variant], (disabled || isLoading) && "opacity-60 cursor-not-allowed active:scale-100", className)}
       disabled={disabled || isLoading}
       {...props}
     >
@@ -43,3 +43,4 @@ export const Button: React.FC<ButtonProps> = ({
     </button>
   );
 };
+

@@ -6,6 +6,7 @@ import { Input, Button } from '@/components/ui';
 import { Card } from '@/components/shared/Card';
 import { useNotif } from '@/context/NotifContext';
 import { useAuth } from '@/hooks/useAuth';
+import { Award, Heart } from 'lucide-react';
 
 export default function CertificadosPage() {
   const [tab, setTab] = useState<'participacion' | 'donacion'>('participacion');
@@ -141,46 +142,55 @@ export default function CertificadosPage() {
 
   return (
     <AuthGuard>
-      <div className="w-full max-w-4xl mx-auto animate-in fade-in duration-300">
+      <div className="w-full max-w-4xl mx-auto animate-in fade-in duration-300 flex flex-col gap-6">
         
         {/* TABS */}
-        <div className="flex w-full bg-gray-200 rounded-lg p-1 mb-6 mt-4">
+        <div className="flex w-full bg-surface border border-border-custom rounded-2xl p-1.5 mb-2 mt-4 shadow-sm">
           <button 
-            className={`flex-1 py-3 text-sm font-semibold rounded-md transition-all ${tab === 'participacion' ? 'bg-white shadow-sm text-[#2D6A4F]' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 ${
+              tab === 'participacion' 
+                ? 'bg-primary text-white shadow-md' 
+                : 'text-text-muted hover:text-primary hover:bg-primary/5'
+            }`}
             onClick={() => setTab('participacion')}
           >
-            🏅 Certificado de Participación
+            <Award className="w-4 h-4" /> Certificado de Participación
           </button>
           <button 
-            className={`flex-1 py-3 text-sm font-semibold rounded-md transition-all ${tab === 'donacion' ? 'bg-white shadow-sm text-[#2D6A4F]' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 ${
+              tab === 'donacion' 
+                ? 'bg-primary text-white shadow-md' 
+                : 'text-text-muted hover:text-primary hover:bg-primary/5'
+            }`}
             onClick={() => setTab('donacion')}
           >
-            💜 Certificado de Donación
+            <Heart className="w-4 h-4" /> Certificado de Donación
           </button>
         </div>
 
         {/* FORMS */}
-        <Card className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-center bg-white min-h-[400px]">
+        <Card className="p-8 md:p-12 flex flex-col md:flex-row gap-12 items-center bg-surface min-h-[400px]">
           <div className="w-full md:w-3/5 flex flex-col gap-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 font-display">
-                {tab === 'participacion' ? 'Descargar Certificado de Participación' : 'Certificado de Donación'}
+              <h2 className="text-2xl font-bold text-text font-display">
+                {tab === 'participacion' ? 'Descargar Certificado de Participación' : 'Descargar Certificado de Donación'}
               </h2>
-              <p className="text-gray-500 mt-1">Completa los datos para validar tu información en el sistema.</p>
+              <div className="w-12 h-1 bg-primary rounded-full mt-2"></div>
+              <p className="text-text-muted mt-3 text-sm">Completa los datos para validar tu información en el sistema.</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Tipo de Documento</label>
+                <label className="text-sm font-semibold text-text/85">Tipo de Documento</label>
                 <select
                   value={tipoDocumento}
                   onChange={(e) => setTipoDocumento(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
+                  className="w-full rounded-xl border border-border-custom bg-surface text-text px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                 >
-                  <option value="CC">Cédula de Ciudadanía (CC)</option>
-                  <option value="CE">Cédula de Extranjería (CE)</option>
-                  <option value="Pasaporte">Pasaporte</option>
-                  <option value="TI">Tarjeta de Identidad (TI)</option>
+                  <option value="CC" className="bg-surface text-text">Cédula de Ciudadanía (CC)</option>
+                  <option value="CE" className="bg-surface text-text">Cédula de Extranjería (CE)</option>
+                  <option value="Pasaporte" className="bg-surface text-text">Pasaporte</option>
+                  <option value="TI" className="bg-surface text-text">Tarjeta de Identidad (TI)</option>
                 </select>
               </div>
 
@@ -194,32 +204,32 @@ export default function CertificadosPage() {
 
               {tab === 'participacion' && (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-gray-700">Tipo de Certificado</label>
+                  <label className="text-sm font-semibold text-text/85">Tipo de Certificado</label>
                   <select
-                    className="w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
+                    className="w-full rounded-xl border border-border-custom bg-surface text-text px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                   >
-                    <option value="Participación en actividad">Participación en actividad</option>
-                    <option value="Voluntariado">Voluntariado</option>
+                    <option value="Participación en actividad" className="bg-surface text-text">Participación en actividad</option>
+                    <option value="Voluntariado" className="bg-surface text-text">Voluntariado</option>
                   </select>
                 </div>
               )}
 
-              <Button type="submit" variant="primary" className="mt-2 w-max" isLoading={submitting}>
+              <Button type="submit" variant="primary" className="mt-4 w-max cursor-pointer shadow-sm animate-in fade-in" isLoading={submitting}>
                 ⬇ SOLICITAR
               </Button>
             </form>
           </div>
 
           <div className="hidden md:flex w-full md:w-2/5 justify-center items-center">
-             <div className={`w-48 h-48 rounded-full flex items-center justify-center opacity-90 ${tab === 'participacion' ? 'bg-emerald-100' : 'bg-blue-100'}`}>
+             <div className={`w-52 h-52 rounded-full flex items-center justify-center transition-colors duration-500 shadow-md ${
+               tab === 'participacion' 
+                 ? 'bg-primary/10 border border-primary/20 text-primary' 
+                 : 'bg-secondary/10 border border-secondary/20 text-secondary'
+             }`}>
                 {tab === 'participacion' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
+                  <Award className="h-24 w-24 animate-pulse" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
+                  <Heart className="h-24 w-24 animate-pulse" />
                 )}
              </div>
           </div>

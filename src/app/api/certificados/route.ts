@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyToken } from '@/services/auth.service';
+import { getCertificadosByUsuario } from '@/services/certificado.service';
 
 export async function POST(req: Request) {
   try {
@@ -104,5 +106,35 @@ export async function POST(req: Request) {
     }
   } catch (error: any) {
     return NextResponse.json({ message: 'No se encontró un certificado para este documento' }, { status: 500 });
+  }
+}
+
+const getUserInfo = (req: Request) => {
+  const authHeader = req.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return verifyToken(authHeader.split(' ')[1]);
+  }
+  return null;
+};
+
+export async function GET(req: Request) {
+  try {
+    const user = getUserInfo(req);
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const certs = await getCertificadosByUsuario(user.id);
+    
+    // Map certificates to include fallback fields for UI compatibility
+    const mappedCerts = certs?.map((c: any) => ({
+      ...c,
+      estado: 'aprobado',
+      created_at: new Date().toISOString(),
+    })) || [];
+
+    return NextResponse.json({ certificados: mappedCerts });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

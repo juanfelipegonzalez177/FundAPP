@@ -5,7 +5,7 @@ import { AuthGuard } from '@/components/layout/AuthGuard';
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard adminOnly>
-      <div className="flex flex-col min-h-screen bg-[#F5F5F0]">
+      <div className="flex flex-col min-h-screen bg-background text-text transition-colors duration-300">
         <Navbar />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
@@ -19,3 +19,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </AuthGuard>
   );
 }
+

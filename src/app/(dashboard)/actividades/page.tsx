@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useActividades } from '@/hooks/useActividades';
 import { useNotif } from '@/context/NotifContext';
 import { formatearFecha } from '@/utils/formatters';
+import { TreePine, Globe, Users } from 'lucide-react';
 
 export default function ActividadesPage() {
   const { user } = useAuth();
@@ -46,77 +47,74 @@ export default function ActividadesPage() {
   return (
     <AuthGuard>
       <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col md:flex-row gap-8 min-h-[500px]">
+        <div className="bg-surface rounded-3xl shadow-xl border border-border-custom p-6 md:p-12 flex flex-col md:flex-row gap-12 min-h-[500px] transition-colors duration-300">
           
-          {/* COLUMNA IZQUIERDA - Formulario 40% */}
-          <div className="w-full md:w-[40%] flex flex-col gap-6">
+          {/* LEFT COLUMN - Form 45% */}
+          <div className="w-full md:w-[45%] flex flex-col gap-6">
             <div>
-              <h2 className="text-2xl font-bold text-[#1B4332] font-display">Postúlate como Voluntario</h2>
-              <p className="text-gray-600 mt-1">Completa los datos para postularte a una actividad.</p>
+              <h2 className="text-3xl font-bold text-text font-display">Postúlate como Voluntario</h2>
+              <div className="w-12 h-1 bg-primary rounded-full mt-2"></div>
+              <p className="text-text-muted mt-3 text-sm">Registra tu postulación para unirte a nuestras brigadas ecológicas.</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <Input
                 label="Usuario (Automático)"
                 type="text"
                 value={user?.nombrecompleto || ''}
                 readOnly
-                className={user?.nombrecompleto ? "cursor-not-allowed opacity-70" : ""}
+                className={user?.nombrecompleto ? "cursor-not-allowed opacity-60 bg-surface/50" : ""}
                 required
               />
               <Input
-                label="Correo"
+                label="Correo Electrónico"
                 type="text"
                 value={user?.correo || ''}
                 readOnly
-                className={user?.correo ? "cursor-not-allowed opacity-70" : ""}
+                className={user?.correo ? "cursor-not-allowed opacity-60 bg-surface/50" : ""}
               />
               
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Actividades Disponibles</label>
+                <label className="text-sm font-semibold text-text/85">Actividad Disponible</label>
                 <select
                   value={actividadId}
                   onChange={(e) => setActividadId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
+                  className="w-full rounded-xl border border-border-custom bg-surface text-text px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                   required
                 >
                   <option value="">Selecciona una opción</option>
                   {!loading && actividades.map(act => (
-                    <option key={act.idactividades} value={act.idactividades}>
+                    <option key={act.idactividades} value={act.idactividades} className="text-text bg-surface">
                       {act.nombreactividad} - Inicio: {formatearFecha(act.fechainicio)}
                     </option>
                   ))}
                 </select>
-                {loading && <span className="text-xs text-gray-500">Cargando actividades...</span>}
+                {loading && <span className="text-xs text-text-muted mt-1">Cargando actividades...</span>}
               </div>
 
-              <Button type="submit" variant="primary" className="w-full mt-4" isLoading={submitting}>
+              <Button type="submit" variant="primary" className="w-full mt-4 cursor-pointer" isLoading={submitting}>
                 POSTULARME
               </Button>
             </form>
           </div>
 
-          {/* COLUMNA DERECHA - Galería 60% */}
-          <div className="w-full md:w-[60%] grid grid-cols-2 gap-4 h-full min-h-[400px]">
-             <div className="col-span-2 h-[200px] md:h-[250px] rounded-xl overflow-hidden shadow-sm bg-gradient-to-br from-[#1B4332] to-emerald-800 flex flex-col items-center justify-center p-6 text-emerald-100/30 hover:text-emerald-100 transition-colors duration-500">
-                <svg className="w-24 h-24 mb-4" fill="currentColor" viewBox="0 0 20 20">
-                   <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
-                </svg>
-                <span className="font-semibold text-lg max-w-xs text-center text-emerald-200/80">Protegiendo ecosistemas juntos</span>
+          {/* RIGHT COLUMN - Gallery/Information 55% */}
+          <div className="w-full md:w-[55%] grid grid-cols-2 gap-4 min-h-[400px]">
+             <div className="col-span-2 h-[220px] md:h-[260px] rounded-2xl overflow-hidden shadow-md bg-gradient-to-br from-primary to-secondary/80 flex flex-col items-center justify-center p-6 text-white group hover:scale-[1.01] transition-all duration-300 border border-primary/20">
+                <TreePine className="w-20 h-20 mb-4 group-hover:scale-110 transition-transform duration-500" />
+                <span className="font-bold text-xl text-center text-white/95 font-display max-w-sm">Protegiendo ecosistemas juntos</span>
              </div>
              
-             <div className="h-[150px] md:h-[200px] rounded-xl overflow-hidden shadow-sm bg-gradient-to-tr from-emerald-600 to-teal-400 flex flex-col items-center justify-center p-4">
-                <svg className="w-16 h-16 text-white/50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-                <span className="font-medium text-sm text-teal-50">Impacto Global</span>
+             <div className="h-[160px] md:h-[200px] rounded-2xl overflow-hidden shadow-md bg-surface border border-border-custom flex flex-col items-center justify-center p-4 text-center hover:border-primary/45 transition-colors duration-300">
+                <Globe className="w-10 h-10 text-primary mb-3" />
+                <span className="font-bold text-sm text-text">Impacto Global</span>
+                <span className="text-xs text-text-muted mt-1 leading-relaxed max-w-[120px]">Restaura el equilibrio natural.</span>
              </div>
              
-             <div className="h-[150px] md:h-[200px] rounded-xl overflow-hidden shadow-sm bg-gradient-to-bl from-[#2D6A4F] to-[#1B4332] flex flex-col items-center justify-center p-4">
-                <svg className="w-16 h-16 text-white/50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span className="font-medium text-sm text-emerald-100/90 text-center">Comunidad en Acción</span>
+             <div className="h-[160px] md:h-[200px] rounded-2xl overflow-hidden shadow-md bg-surface border border-border-custom flex flex-col items-center justify-center p-4 text-center hover:border-secondary/45 transition-colors duration-300">
+                <Users className="w-10 h-10 text-secondary mb-3" />
+                <span className="font-bold text-sm text-text">Comunidad Activa</span>
+                <span className="text-xs text-text-muted mt-1 leading-relaxed max-w-[120px]">Sinergia ecosocial colectiva.</span>
              </div>
           </div>
 

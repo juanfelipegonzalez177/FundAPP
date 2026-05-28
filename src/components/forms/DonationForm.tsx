@@ -36,13 +36,13 @@ export const DonationForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 w-full text-text">
       <Input
         label="Nombres y Apellidos"
         type="text"
         error={errors.nombrecompleto?.message as any}
         readOnly={!!user?.nombrecompleto}
-        className={user?.nombrecompleto ? "opacity-75" : ""}
+        className={user?.nombrecompleto ? "opacity-60 bg-surface/50 cursor-not-allowed" : ""}
         {...register('nombrecompleto' as any, { required: 'Requerido' })}
       />
 
@@ -55,7 +55,7 @@ export const DonationForm = () => {
           error={errors.monto?.message}
           {...register('monto', { required: 'Requerido', min: { value: 1000, message: 'Mínimo $1000' } })}
         />
-        <span className="absolute left-3 top-9 text-gray-500 font-medium">$</span>
+        <span className="absolute left-4.5 top-[39px] text-text-muted font-semibold text-sm">$</span>
       </div>
 
       <Input
@@ -63,41 +63,41 @@ export const DonationForm = () => {
         type="email"
         error={errors.correo?.message as any}
         readOnly={!!user?.correo}
-        className={user?.correo ? "opacity-75" : ""}
+        className={user?.correo ? "opacity-60 bg-surface/50 cursor-not-allowed" : ""}
         {...register('correo' as any, { required: 'Requerido' })}
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">Método de Pago</label>
+        <label className="text-sm font-semibold text-text/85">Método de Pago</label>
         <select 
-          className="flex w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
+          className="flex w-full rounded-xl border border-border-custom bg-surface text-text px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
           {...register('metodopago' as any, { required: 'Requerido' })}
         >
-          <option value="">Selecciona un método</option>
-          <option value="Tarjeta Crédito">Tarjeta Crédito</option>
-          <option value="Transferencia">Transferencia</option>
-          <option value="PSE">PSE</option>
-          <option value="Nequi">Nequi</option>
-          <option value="Daviplata">Daviplata</option>
+          <option value="" className="bg-surface text-text">Selecciona un método</option>
+          <option value="Tarjeta Crédito" className="bg-surface text-text">Tarjeta Crédito</option>
+          <option value="Transferencia" className="bg-surface text-text">Transferencia</option>
+          <option value="PSE" className="bg-surface text-text">PSE</option>
+          <option value="Nequi" className="bg-surface text-text">Nequi</option>
+          <option value="Daviplata" className="bg-surface text-text">Daviplata</option>
         </select>
-        {errors.metodopago && <span className="text-xs text-red-500">{errors.metodopago.message as any}</span>}
+        {errors.metodopago && <span className="text-xs text-red-500 font-medium">{errors.metodopago.message as any}</span>}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">¿A quién va dirigida esta donación?</label>
+        <label className="text-sm font-semibold text-text/85">¿A quién va dirigida esta donación?</label>
         <textarea
-          className="flex w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] min-h-[100px]"
+          className="flex w-full rounded-xl border border-border-custom bg-surface text-text px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all min-h-[100px]"
           placeholder="Escribe un mensaje de apoyo..."
           {...register('propositodonacion' as any)}
         />
       </div>
 
-      <Button type="submit" variant="primary" className="w-full mt-2" isLoading={submitting}>
-        DONAR
+      <Button type="submit" variant="primary" className="w-full mt-2 cursor-pointer shadow-sm" isLoading={submitting}>
+        DONAR AHORA
       </Button>
 
-      <div className="mt-4 p-4 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 shadow-sm text-center">
-        Al confirmar su donación, en el apartado de certificación se le dará un certificado como reconocimiento por ayudar con esta gran causa 😊
+      <div className="mt-4 p-4 border border-border-custom bg-primary/5 dark:bg-primary/10 rounded-2xl text-xs text-text-muted/90 shadow-sm text-center leading-relaxed font-semibold">
+        Al confirmar tu donación, recibirás un certificado de donación electrónico oficial como reconocimiento por apoyar nuestra gran causa ecosocial. 😊
       </div>
     </form>
   );
