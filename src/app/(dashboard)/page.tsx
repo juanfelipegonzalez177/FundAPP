@@ -79,7 +79,7 @@ export default function PublicPage() {
 
   // Fetch public stats on load
   useEffect(() => {
-    fetch('/api/admin/stats')
+    fetch('/api/public/stats')
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
@@ -124,6 +124,7 @@ export default function PublicPage() {
 
     return () => observer.disconnect();
   }, []);
+
 
   return (
     <div className="flex flex-col w-full min-h-screen font-sans overflow-hidden bg-background text-text">
