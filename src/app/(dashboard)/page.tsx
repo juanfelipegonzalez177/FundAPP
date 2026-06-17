@@ -197,7 +197,7 @@ export default function PublicPage() {
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
                 <Counter target={stats.actividadesActivas} />
               </h2>
-              <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Actividades Realizadas</p>
+              <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Actividades Disponibles</p>
            </div>
            
            {/* Card 3: Fondos */}

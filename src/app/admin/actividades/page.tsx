@@ -58,31 +58,39 @@ export default function AdminActividadesPage() {
     }
   };
 
-  // Filter & Sort Logic
-  const filteredActividades = actividades
-    .filter(a => {
-      const matchesSearch = 
-        (a.nombreactividad?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-        (a.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-        (a.ubicacion?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
-      
-      const matchesDate = !filterDate || (a.fechainicio && a.fechainicio >= filterDate);
-      
-      return matchesSearch && matchesDate;
-    })
-    .sort((a, b) => {
-      if (!sortBy) return 0;
-      const valA = a.nombreactividad || '';
-      const valB = b.nombreactividad || '';
-      return sortBy === 'asc' 
-        ? valA.localeCompare(valB) 
-        : valB.localeCompare(valA);
-    });
+  const toggleEstado = async (id: number, fechafin: string) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isActiva = fechafin ? fechafin >= todayStr : false;
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-  const totalItems = filteredActividades.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedActividades = filteredActividades.slice(startIndex, startIndex + itemsPerPage);
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 30);
+    const futureDateStr = futureDate.toISOString().split('T')[0];
+
+    const nuevaFechaFin = isActiva ? yesterdayStr : futureDateStr;
+
+    try {
+      const res = await fetch(`/api/actividades?id=${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ fechafin: nuevaFechaFin })
+      });
+
+      if (res.ok) {
+        loadData();
+      } else {
+        console.error('Error al cambiar estado');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8 animate-in fade-in duration-300">
@@ -157,53 +165,39 @@ export default function AdminActividadesPage() {
         {loading ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">Cargando actividades...</div>
         ) : (
-          <>
-            <Table columns={['Nombre', 'Descripción', 'Fecha Inicio', 'Fecha Fin', 'Ubicación', 'Acciones']}>
-              {paginatedActividades.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">No hay actividades registradas</td></tr>
-              ) : paginatedActividades.map((a: any) => (
-                <tr key={a.idactividades} className="border-b border-border-custom hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                  <td className="px-4 py-4 font-medium text-gray-900 dark:text-gray-100">{a.nombreactividad}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 truncate max-w-xs">{a.descripcion}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{formatearFecha(a.fechainicio)}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{formatearFecha(a.fechafin)}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{a.ubicacion}</td>
+          <Table columns={['Nombre', 'Descripción', 'Fecha Inicio', 'Fecha Fin', 'Estado', 'Ubicación', 'Acciones']}>
+            {actividades.length === 0 ? (
+              <tr><td colSpan={7} className="text-center py-4 text-gray-500 text-sm">No hay actividades registradas</td></tr>
+            ) : actividades.map((a: any) => {
+              const isActiva = a.fechafin ? a.fechafin >= new Date().toISOString().split('T')[0] : false;
+              return (
+                <tr key={a.idactividades} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-4 font-medium text-gray-900">{a.nombreactividad}</td>
+                  <td className="px-4 py-4 text-sm text-gray-600 truncate max-w-xs">{a.descripcion}</td>
+                  <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechainicio)}</td>
+                  <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechafin)}</td>
                   <td className="px-4 py-4">
-                    <Button variant="outline" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 border-red-100 dark:border-red-900/30 px-3 py-1 text-xs" onClick={() => handleDelete(a.idactividades)}>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${isActiva ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {isActiva ? 'Activa' : 'Inactiva'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-600">{a.ubicacion}</td>
+                  <td className="px-4 py-4 flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className={`px-3 py-1 text-xs ${isActiva ? 'text-amber-600 hover:bg-amber-50 border-amber-100' : 'text-emerald-600 hover:bg-emerald-50 border-emerald-100'}`} 
+                      onClick={() => toggleEstado(a.idactividades, a.fechafin)}
+                    >
+                      {isActiva ? 'Desactivar' : 'Activar'}
+                    </Button>
+                    <Button variant="outline" className="text-red-600 hover:bg-red-50 hover:border-red-200 border-red-100 px-3 py-1 text-xs" onClick={() => handleDelete(a.idactividades)}>
                       Eliminar
                     </Button>
                   </td>
                 </tr>
-              ))}
-            </Table>
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border-custom pt-4 mt-6 text-text-muted">
-                <span className="text-sm font-semibold dark:text-gray-300">
-                  Página {currentPage} de {totalPages} ({totalItems} registros)
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50 dark:border-border-custom dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50 dark:border-border-custom dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
+              );
+            })}
+          </Table>
         )}
       </Card>
 
