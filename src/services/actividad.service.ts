@@ -28,16 +28,28 @@ export const createActividad = async (dto: CreateActividadDTO) => {
 
 export const updateActividad = async (id: string, dto: UpdateActividadDTO) => {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .schema('voluntariado')
-    .from('actividades')
-    .update(dto as any)
-    .eq('idactividades', id)
-    .select()
-    .single();
+  if (id === 'all') {
+    const { data, error } = await supabase
+      .schema('voluntariado')
+      .from('actividades')
+      .update(dto as any)
+      .neq('idactividades', 0)
+      .select();
 
-  if (error) throw new Error(error.message);
-  return data;
+    if (error) throw new Error(error.message);
+    return data;
+  } else {
+    const { data, error } = await supabase
+      .schema('voluntariado')
+      .from('actividades')
+      .update(dto as any)
+      .eq('idactividades', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
 };
 
 export const deleteActividad = async (id: string) => {

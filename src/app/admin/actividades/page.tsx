@@ -12,6 +12,8 @@ export default function AdminActividadesPage() {
   const [actividades, setActividades] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const loadData = () => {
     if (!token) return;
@@ -23,6 +25,7 @@ export default function AdminActividadesPage() {
       .then(data => {
         setActividades(Array.isArray(data) ? data : []);
         setLoading(false);
+        setCurrentPage(1);
       })
       .catch(() => setLoading(false));
   };
@@ -85,6 +88,44 @@ export default function AdminActividadesPage() {
     }
   };
 
+  const toggleTodas = async (activar: boolean) => {
+    if (confirm(`¿Seguro que deseas ${activar ? 'activar' : 'desactivar'} TODAS las actividades?`)) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 30);
+      const futureDateStr = futureDate.toISOString().split('T')[0];
+
+      const nuevaFechaFin = activar ? futureDateStr : yesterdayStr;
+
+      try {
+        const res = await fetch(`/api/actividades?id=all`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ fechafin: nuevaFechaFin })
+        });
+
+        if (res.ok) {
+          loadData();
+        } else {
+          console.error('Error al actualizar todas las actividades');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const totalItems = actividades.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedActividades = actividades.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div className="flex flex-col gap-8 animate-in fade-in duration-300">
       <div className="flex justify-between items-end">
@@ -92,48 +133,84 @@ export default function AdminActividadesPage() {
           <h2 className="text-3xl font-bold text-gray-900 font-display">Gestión de Actividades</h2>
           <p className="text-gray-500 mt-1">Administra las actividades y eventos de la fundación.</p>
         </div>
-        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-          + Nueva Actividad
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 px-3 py-1.5 text-xs font-semibold" onClick={() => toggleTodas(true)}>
+            Activar Todas
+          </Button>
+          <Button variant="outline" className="text-amber-700 border-amber-200 hover:bg-amber-50 px-3 py-1.5 text-xs font-semibold" onClick={() => toggleTodas(false)}>
+            Desactivar Todas
+          </Button>
+          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+            + Nueva Actividad
+          </Button>
+        </div>
       </div>
       
       <Card className="p-6">
         {loading ? (
           <div className="text-center py-8 text-gray-500">Cargando actividades...</div>
         ) : (
-          <Table columns={['Nombre', 'Descripción', 'Fecha Inicio', 'Fecha Fin', 'Estado', 'Ubicación', 'Acciones']}>
-            {actividades.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-4 text-gray-500 text-sm">No hay actividades registradas</td></tr>
-            ) : actividades.map((a: any) => {
-              const isActiva = a.fechafin ? a.fechafin >= new Date().toISOString().split('T')[0] : false;
-              return (
-                <tr key={a.idactividades} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-4 font-medium text-gray-900">{a.nombreactividad}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600 truncate max-w-xs">{a.descripcion}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechainicio)}</td>
-                  <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechafin)}</td>
-                  <td className="px-4 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${isActiva ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {isActiva ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-600">{a.ubicacion}</td>
-                  <td className="px-4 py-4 flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className={`px-3 py-1 text-xs ${isActiva ? 'text-amber-600 hover:bg-amber-50 border-amber-100' : 'text-emerald-600 hover:bg-emerald-50 border-emerald-100'}`} 
-                      onClick={() => toggleEstado(a.idactividades, a.fechafin)}
-                    >
-                      {isActiva ? 'Desactivar' : 'Activar'}
-                    </Button>
-                    <Button variant="outline" className="text-red-600 hover:bg-red-50 hover:border-red-200 border-red-100 px-3 py-1 text-xs" onClick={() => handleDelete(a.idactividades)}>
-                      Eliminar
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </Table>
+          <>
+            <Table columns={['Nombre', 'Descripción', 'Fecha Inicio', 'Fecha Fin', 'Estado', 'Ubicación', 'Acciones']}>
+              {paginatedActividades.length === 0 ? (
+                <tr><td colSpan={7} className="text-center py-4 text-gray-500 text-sm">No hay actividades registradas</td></tr>
+              ) : paginatedActividades.map((a: any) => {
+                const isActiva = a.fechafin ? a.fechafin >= new Date().toISOString().split('T')[0] : false;
+                return (
+                  <tr key={a.idactividades} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-4 font-medium text-gray-900">{a.nombreactividad}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600 truncate max-w-xs">{a.descripcion}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechainicio)}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechafin)}</td>
+                    <td className="px-4 py-4">
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${isActiva ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {isActiva ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600">{a.ubicacion}</td>
+                    <td className="px-4 py-4 flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        className={`px-3 py-1 text-xs ${isActiva ? 'text-amber-600 hover:bg-amber-50 border-amber-100' : 'text-emerald-600 hover:bg-emerald-50 border-emerald-100'}`} 
+                        onClick={() => toggleEstado(a.idactividades, a.fechafin)}
+                      >
+                        {isActiva ? 'Desactivar' : 'Activar'}
+                      </Button>
+                      <Button variant="outline" className="text-red-600 hover:bg-red-50 hover:border-red-200 border-red-100 px-3 py-1 text-xs" onClick={() => handleDelete(a.idactividades)}>
+                        Eliminar
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </Table>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-border-custom pt-4 mt-6 text-text-muted">
+                <span className="text-sm font-semibold dark:text-gray-300">
+                  Página {currentPage} de {totalPages} ({totalItems} registros)
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </Card>
 
