@@ -138,3 +138,18 @@ export const register = async (dto: RegisterDTO) => {
 
   return { user, token };
 };
+
+export const resendConfirmation = async (email: string) => {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { success: true };
+};
+
