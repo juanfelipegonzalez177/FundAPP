@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { login, register, verifyToken } from '@/services/auth.service';
+import { login, register, verifyToken, resendConfirmation } from '@/services/auth.service';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
@@ -11,6 +11,9 @@ export async function POST(req: Request) {
     if (action === 'register') {
       const data = await register(body);
       return NextResponse.json(data, { status: 201 });
+    } else if (action === 'resend') {
+      const data = await resendConfirmation(body.email);
+      return NextResponse.json(data);
     } else {
       const data = await login(body);
       return NextResponse.json(data);

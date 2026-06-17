@@ -47,9 +47,9 @@ export const ActivityForm: React.FC<ActivityFormProps> = ({ onSuccess }) => {
       />
       
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-gray-700">Descripción</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
         <textarea
-          className="flex w-full rounded-lg border border-gray-300 bg-[#F3F4F6] px-3.5 py-2.5 text-sm focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] min-h-[80px]"
+          className="flex w-full rounded-lg border border-gray-300 dark:border-border-custom bg-[#F3F4F6] dark:bg-surface px-3.5 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-[#2D6A4F] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] min-h-[80px]"
           {...register('descripcion')}
         />
       </div>
