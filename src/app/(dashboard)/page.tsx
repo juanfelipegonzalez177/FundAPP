@@ -75,6 +75,37 @@ const Typewriter = ({ words }: { words: string[] }) => {
 };
 
 export default function PublicPage() {
+  const [stats, setStats] = useState({ totalVoluntarios: 47, actividadesActivas: 14, montoTotal: 1800000 });
+
+  // Fetch public stats on load
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setStats({
+            totalVoluntarios: typeof data.totalVoluntarios === 'number' ? data.totalVoluntarios : 47,
+            actividadesActivas: typeof data.actividadesActivas === 'number' ? data.actividadesActivas : 14,
+            montoTotal: typeof data.montoTotal === 'number' ? data.montoTotal : 1800000
+          });
+        }
+      })
+      .catch(err => console.error('Error fetching public stats:', err));
+  }, []);
+
+  // Format funds dynamically based on amount
+  const getFundsConfig = (monto: number) => {
+    if (monto >= 1000000) {
+      return { target: monto / 1000000, decimals: 1, suffix: 'M' };
+    } else if (monto >= 1000) {
+      return { target: monto / 1000, decimals: 0, suffix: 'K' };
+    } else {
+      return { target: monto, decimals: 0, suffix: '' };
+    }
+  };
+
+  const fundsConfig = getFundsConfig(stats.montoTotal);
+
   // Scroll Reveal Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -152,7 +183,7 @@ export default function PublicPage() {
                  <Users className="w-7 h-7" />
               </div>
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
-                <Counter target={47} />
+                <Counter target={stats.totalVoluntarios} />
               </h2>
               <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Voluntarios Activos</p>
            </div>
@@ -163,7 +194,7 @@ export default function PublicPage() {
                  <Calendar className="w-7 h-7" />
               </div>
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
-                <Counter target={14} />
+                <Counter target={stats.actividadesActivas} />
               </h2>
               <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Actividades Realizadas</p>
            </div>
@@ -174,7 +205,7 @@ export default function PublicPage() {
                  <Heart className="w-7 h-7" />
               </div>
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
-                <Counter target={1.8} decimals={1} prefix="$" suffix="M" />
+                <Counter target={fundsConfig.target} decimals={fundsConfig.decimals} prefix="$" suffix={fundsConfig.suffix} />
               </h2>
               <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Fondos Recaudados</p>
            </div>
