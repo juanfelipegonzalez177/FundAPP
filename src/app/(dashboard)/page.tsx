@@ -75,6 +75,37 @@ const Typewriter = ({ words }: { words: string[] }) => {
 };
 
 export default function PublicPage() {
+  const [stats, setStats] = useState({ totalVoluntarios: 47, actividadesActivas: 14, montoTotal: 1800000 });
+
+  // Fetch public stats on load
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setStats({
+            totalVoluntarios: typeof data.totalVoluntarios === 'number' ? data.totalVoluntarios : 47,
+            actividadesActivas: typeof data.actividadesActivas === 'number' ? data.actividadesActivas : 14,
+            montoTotal: typeof data.montoTotal === 'number' ? data.montoTotal : 1800000
+          });
+        }
+      })
+      .catch(err => console.error('Error fetching public stats:', err));
+  }, []);
+
+  // Format funds dynamically based on amount
+  const getFundsConfig = (monto: number) => {
+    if (monto >= 1000000) {
+      return { target: monto / 1000000, decimals: 1, suffix: 'M' };
+    } else if (monto >= 1000) {
+      return { target: monto / 1000, decimals: 0, suffix: 'K' };
+    } else {
+      return { target: monto, decimals: 0, suffix: '' };
+    }
+  };
+
+  const fundsConfig = getFundsConfig(stats.montoTotal);
+
   // Scroll Reveal Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -131,14 +162,14 @@ export default function PublicPage() {
               Hacer una donación
             </Link>
           </div>
+        </div>
 
-          {/* Animated Scroll Down Arrow */}
-          <div className="absolute bottom-6 flex flex-col items-center justify-center animate-bounce opacity-70">
-            <span className="text-xs uppercase tracking-widest text-emerald-100 font-bold mb-2">Explorar</span>
-            <svg className="w-6 h-6 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
+        {/* Animated Scroll Down Arrow - Moved to the outer section to center correctly relative to the full hero */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center animate-bounce opacity-70 z-10">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-100 font-bold mb-2">Explorar</span>
+          <svg className="w-5 h-5 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
         </div>
       </section>
 
@@ -152,7 +183,7 @@ export default function PublicPage() {
                  <Users className="w-7 h-7" />
               </div>
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
-                <Counter target={47} />
+                <Counter target={stats.totalVoluntarios} />
               </h2>
               <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Voluntarios Activos</p>
            </div>
@@ -163,7 +194,7 @@ export default function PublicPage() {
                  <Calendar className="w-7 h-7" />
               </div>
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
-                <Counter target={14} />
+                <Counter target={stats.actividadesActivas} />
               </h2>
               <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Actividades Realizadas</p>
            </div>
@@ -174,7 +205,7 @@ export default function PublicPage() {
                  <Heart className="w-7 h-7" />
               </div>
               <h2 className="text-5xl font-extrabold text-text mb-1 tracking-tight">
-                <Counter target={1.8} decimals={1} prefix="$" suffix="M" />
+                <Counter target={fundsConfig.target} decimals={fundsConfig.decimals} prefix="$" suffix={fundsConfig.suffix} />
               </h2>
               <p className="text-text-muted font-bold text-sm tracking-wide uppercase">Fondos Recaudados</p>
            </div>
