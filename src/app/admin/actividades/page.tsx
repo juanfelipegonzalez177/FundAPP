@@ -148,35 +148,35 @@ export default function AdminActividadesPage() {
       
       <Card className="p-6">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Cargando actividades...</div>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">Cargando actividades...</div>
         ) : (
           <>
             <Table columns={['Nombre', 'Descripción', 'Fecha Inicio', 'Fecha Fin', 'Estado', 'Ubicación', 'Acciones']}>
               {paginatedActividades.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-4 text-gray-500 text-sm">No hay actividades registradas</td></tr>
+                <tr><td colSpan={7} className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">No hay actividades registradas</td></tr>
               ) : paginatedActividades.map((a: any) => {
                 const isActiva = a.fechafin ? a.fechafin >= new Date().toISOString().split('T')[0] : false;
                 return (
-                  <tr key={a.idactividades} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-4 font-medium text-gray-900">{a.nombreactividad}</td>
-                    <td className="px-4 py-4 text-sm text-gray-600 truncate max-w-xs">{a.descripcion}</td>
-                    <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechainicio)}</td>
-                    <td className="px-4 py-4 text-sm text-gray-600">{formatearFecha(a.fechafin)}</td>
+                  <tr key={a.idactividades} className="border-b border-border-custom hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                    <td className="px-4 py-4 font-medium text-gray-900 dark:text-gray-100">{a.nombreactividad}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 truncate max-w-xs">{a.descripcion}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{formatearFecha(a.fechainicio)}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{formatearFecha(a.fechafin)}</td>
                     <td className="px-4 py-4">
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${isActiva ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${isActiva ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}>
                         {isActiva ? 'Activa' : 'Inactiva'}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-600">{a.ubicacion}</td>
+                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{a.ubicacion}</td>
                     <td className="px-4 py-4 flex gap-2">
                       <Button 
                         variant="outline" 
-                        className={`px-3 py-1 text-xs ${isActiva ? 'text-amber-600 hover:bg-amber-50 border-amber-100' : 'text-emerald-600 hover:bg-emerald-50 border-emerald-100'}`} 
+                        className={`px-3 py-1 text-xs ${isActiva ? 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-200 border-amber-100 dark:border-amber-900/30' : 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-200 border-emerald-100 dark:border-emerald-900/30'}`} 
                         onClick={() => toggleEstado(a.idactividades, a.fechafin)}
                       >
                         {isActiva ? 'Desactivar' : 'Activar'}
                       </Button>
-                      <Button variant="outline" className="text-red-600 hover:bg-red-50 hover:border-red-200 border-red-100 px-3 py-1 text-xs" onClick={() => handleDelete(a.idactividades)}>
+                      <Button variant="outline" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 border-red-100 dark:border-red-900/30 px-3 py-1 text-xs" onClick={() => handleDelete(a.idactividades)}>
                         Eliminar
                       </Button>
                     </td>
@@ -195,7 +195,7 @@ export default function AdminActividadesPage() {
                     variant="outline"
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50 dark:border-border-custom dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     Anterior
                   </Button>
@@ -203,7 +203,7 @@ export default function AdminActividadesPage() {
                     variant="outline"
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50 dark:border-border-custom dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     Siguiente
                   </Button>
@@ -217,10 +217,10 @@ export default function AdminActividadesPage() {
       {/* Modal - ActivityForm */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+           <div className="bg-white dark:bg-surface rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border-custom">
               <div className="flex justify-between items-center mb-6">
-                 <h3 className="text-2xl font-bold text-gray-900">Nueva Actividad</h3>
-                 <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                 <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Nueva Actividad</h3>
+                 <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
                     ✕
                  </button>
               </div>
