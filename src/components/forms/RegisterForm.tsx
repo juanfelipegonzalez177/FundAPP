@@ -27,7 +27,7 @@ export const RegisterForm = () => {
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.error || 'Error al registrar.');
       
-      notify('Registro exitoso. Inicia sesión.', 'success');
+      notify('Registro exitoso. Por favor, confirma tu correo electrónico en tu bandeja de entrada antes de iniciar sesión.', 'success');
       router.push('/login');
     } catch (e: any) {
       setApiError(e.message);
