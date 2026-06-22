@@ -15,9 +15,9 @@ export default function AdminActividadesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const loadData = () => {
+  const loadData = (silent = false) => {
     if (!token) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     fetch('/api/admin/actividades', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -25,7 +25,6 @@ export default function AdminActividadesPage() {
       .then(data => {
         setActividades(Array.isArray(data) ? data : []);
         setLoading(false);
-        setCurrentPage(1);
       })
       .catch(() => setLoading(false));
   };
@@ -54,7 +53,7 @@ export default function AdminActividadesPage() {
     }
   };
 
-  const toggleEstado = async (id: number, fechafin: string) => {
+  const toggleEstado = async (id: number, fechainicio: string, fechafin: string) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const isActiva = fechafin ? fechafin >= todayStr : false;
     
@@ -62,11 +61,20 @@ export default function AdminActividadesPage() {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 30);
-    const futureDateStr = futureDate.toISOString().split('T')[0];
+    let updateBody = {};
+    if (isActiva) {
+      updateBody = { fechainicio: yesterdayStr, fechafin: yesterdayStr };
+    } else {
+      const today = new Date();
+      const fechainicioDate = fechainicio ? new Date(fechainicio) : today;
+      const baseDate = fechainicioDate > today ? fechainicioDate : today;
+      
+      const futureDate = new Date(baseDate);
+      futureDate.setDate(futureDate.getDate() + 30);
+      const futureDateStr = futureDate.toISOString().split('T')[0];
 
-    const nuevaFechaFin = isActiva ? yesterdayStr : futureDateStr;
+      updateBody = { fechafin: futureDateStr };
+    }
 
     try {
       const res = await fetch(`/api/actividades?id=${id}`, {
@@ -75,11 +83,11 @@ export default function AdminActividadesPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ fechafin: nuevaFechaFin })
+        body: JSON.stringify(updateBody)
       });
 
       if (res.ok) {
-        loadData();
+        loadData(true);
       } else {
         console.error('Error al cambiar estado');
       }
@@ -94,11 +102,9 @@ export default function AdminActividadesPage() {
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 30);
-      const futureDateStr = futureDate.toISOString().split('T')[0];
-
-      const nuevaFechaFin = activar ? futureDateStr : yesterdayStr;
+      const updateBody = activar 
+        ? { fechafin: '2030-12-31' } 
+        : { fechainicio: yesterdayStr, fechafin: yesterdayStr };
 
       try {
         const res = await fetch(`/api/actividades?id=all`, {
@@ -107,11 +113,11 @@ export default function AdminActividadesPage() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ fechafin: nuevaFechaFin })
+          body: JSON.stringify(updateBody)
         });
 
         if (res.ok) {
-          loadData();
+          loadData(true);
         } else {
           console.error('Error al actualizar todas las actividades');
         }
@@ -122,8 +128,9 @@ export default function AdminActividadesPage() {
   };
 
   const totalItems = actividades.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * itemsPerPage;
   const paginatedActividades = actividades.slice(startIndex, startIndex + itemsPerPage);
 
   return (
@@ -172,7 +179,7 @@ export default function AdminActividadesPage() {
                       <Button 
                         variant="outline" 
                         className={`px-3 py-1 text-xs ${isActiva ? 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-200 border-amber-100 dark:border-amber-900/30' : 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-200 border-emerald-100 dark:border-emerald-900/30'}`} 
-                        onClick={() => toggleEstado(a.idactividades, a.fechafin)}
+                        onClick={() => toggleEstado(a.idactividades, a.fechainicio, a.fechafin)}
                       >
                         {isActiva ? 'Desactivar' : 'Activar'}
                       </Button>
@@ -188,13 +195,13 @@ export default function AdminActividadesPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-border-custom pt-4 mt-6 text-text-muted">
                 <span className="text-sm font-semibold dark:text-gray-300">
-                  Página {currentPage} de {totalPages} ({totalItems} registros)
+                  Página {activePage} de {totalPages} ({totalItems} registros)
                 </span>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
+                    disabled={activePage === 1}
                     className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50 dark:border-border-custom dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     Anterior
@@ -202,7 +209,7 @@ export default function AdminActividadesPage() {
                   <Button
                     variant="outline"
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
+                    disabled={activePage === totalPages}
                     className="px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50 dark:border-border-custom dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     Siguiente
@@ -224,7 +231,7 @@ export default function AdminActividadesPage() {
                     ✕
                  </button>
               </div>
-              <ActivityForm onSuccess={() => { setIsModalOpen(false); loadData(); }} />
+              <ActivityForm onSuccess={() => { setIsModalOpen(false); loadData(true); }} />
            </div>
         </div>
       )}

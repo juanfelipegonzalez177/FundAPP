@@ -19,9 +19,9 @@ export default function AdminVoluntariosPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const loadData = () => {
+  const loadData = (silent = false) => {
     if (!token) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     fetch('/api/admin/voluntarios', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -55,7 +55,7 @@ export default function AdminVoluntariosPage() {
         return;
       }
       notify(`Estado actualizado a ${nuevoEstado}`, 'success');
-      loadData();
+      loadData(true);
     } catch (error) {
       notify('Error de red', 'error');
     }
@@ -70,7 +70,7 @@ export default function AdminVoluntariosPage() {
       });
       if(res.ok) {
         notify('Voluntario eliminado exitosamente', 'success');
-        loadData();
+        loadData(true);
       } else {
         notify('Error al eliminar el voluntario', 'error');
       }
